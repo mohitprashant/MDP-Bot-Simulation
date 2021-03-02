@@ -172,7 +172,7 @@ class FPS:
         
         moveset=actionlist1[1:]+actionlist2[1:]
         
-        outputstring="FSP|"
+        outputstring="FPS|"
         for x in moveset:
             outputstring+=x
     
@@ -184,6 +184,7 @@ fps=FPS()
 p1='FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
 p2='00400080010000000000003F000000000000400100040F000000000380000000080010002000'
 fps.setEnvironment(p1, p2)
+fps.setWaypoint(1, 1)
 print(fps.getShortestPathWithWaypoint())
 #########
         

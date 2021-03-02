@@ -19,12 +19,13 @@ class Robot:
     shortRange=7
     longRange=13
     
-    sensors=[['long', 'up', 0],
-             ['short', 'right', -1],
-             ['short', 'right', 0],
+    sensors=[
              ['short', 'right', 1],
+             ['short', 'right', 0],
+             ['short', 'right', -1],
+             ['short', 'down', 0],
              ['short', 'down', -1],
-             ['short', 'down', 1]
+             ['long', 'up', 0]
              ]      #sensors
     
     sensedEnvironment=[]   #mapped environment
@@ -39,7 +40,8 @@ class Robot:
             
         for i in range(16,20):
             for j in range(0,4):
-                self.sensedEnvironment[i][j].remove('?')
+                if('?' in self.sensedEnvironment[i][j]):
+                    self.sensedEnvironment[i][j].remove('?')
                 if(j<3 and i>16):
                     self.sensedEnvironment[i][j].append('S')
                 else:
@@ -48,7 +50,8 @@ class Robot:
         for i in range(0,3):
             for j in range(12,15):
                 self.sensedEnvironment[i][j].append('G')
-                self.sensedEnvironment[i][j].remove('?')
+                if('?' in self.sensedEnvironment[i][j]):
+                    self.sensedEnvironment[i][j].remove('?')
                 
                 
     def moveForward(self):
@@ -92,12 +95,14 @@ class Robot:
         for i in range(len(self.sensors)):
             if(self.sensors[i][1]=='right'):
                 self.sensors[i][1]='down'
+                self.sensors[i][2]*=-1
                 
             elif(self.sensors[i][1]=='down'):
                 self.sensors[i][1]='left'
                 
             elif(self.sensors[i][1]=='left'):
                 self.sensors[i][1]='up'
+                self.sensors[i][2]*=-1
                 
             elif(self.sensors[i][1]=='up'):
                 self.sensors[i][1]='right'
@@ -123,21 +128,29 @@ class Robot:
                 
             elif(self.sensors[i][1]=='down'):
                 self.sensors[i][1]='right'
+                self.sensors[i][2]*=-1
                 
             elif(self.sensors[i][1]=='left'):
                 self.sensors[i][1]='down'
                 
             elif(self.sensors[i][1]=='up'):
                 self.sensors[i][1]='left'
+                self.sensors[i][2]*=-1
                 
     def sense(self, environment):
         readings=[]
         
         for x in self.sensors:
-            start=[]
-            
+            senseRange=0
             if('right' in x):
-                pass
+                if('long' in x):
+                    senseRange=self.longRange
+                else:
+                    senseRange=self.shortRange
+                
+                for i in range(1, senseRange):
+                        if(i==1):
+                            pass
             
             elif('left' in x):
                 pass
@@ -150,7 +163,105 @@ class Robot:
         
     
     def processSense(self, readings):
+        for i in range(self.bot.left, self.bot.right+1):
+            for j in range(self.bot.up, self.bot.down+1):
+                if(self.bot.sensedEnvironment[j][i]=='?'):
+                    self.bot.sensedEnvironment[j][i]==' '
+        
+        sense=readings.split('|')
+        for i in range(len(sense)):
+            sense[i]=float(sense[i])
+            
+        for i in range(sense):
+            value=sense[i]
+            x=self.sensors[i]
+            senseRange=0
+            
+            if('right' in x):
+                if('long' in x):
+                    senseRange=self.longRange
+                else:
+                    senseRange=self.shortRange
+                    
+                if(value==-1):
+                    for j in range(0, senseRange):
+                        if(self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.right+j][0]=='?'):
+                            self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.right+j][0]=' '
+                    
+                for j in range(0, value):
+                    if(self.bot.right+j<=14):
+                        if(self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.right+j][0]=='?'):
+                            self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.right+j][0]=' '
+                
+                if(self.bot.right+value<=14):          
+                    if(self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.right+value][0]=='?'):
+                            self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.right+value][0]='X'
+                    
+            elif('left' in x):
+                if('long' in x):
+                    senseRange=self.longRange
+                else:
+                    senseRange=self.shortRange
+                    
+                if(value==-1):
+                    for j in range(0, senseRange):
+                        if(self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.left-j][0]=='?'):
+                            self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.left-j][0]=' '
+                    
+                for j in range(0, value):
+                    if(self.bot.left-j>=0):
+                        if(self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.left-j][0]=='?'):
+                            self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.left-j][0]=' '
+                            
+                if(self.bot.left-value>=0):          
+                    if(self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.left-value][0]=='?'):
+                            self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.left-value][0]='X'
+        
+            elif('up' in x):
+                if('long' in x):
+                    senseRange=self.longRange
+                else:
+                    senseRange=self.shortRange
+                    
+                if(value==-1):
+                    for j in range(0, senseRange):
+                        if(self.bot.sensedEnvironment[self.bot.up-j][self.bot.left+1+x[2]][0]=='?'):
+                            self.bot.sensedEnvironment[self.bot.up-j][self.bot.left+1+x[2]][0]=' '
+                    
+                for j in range(0, value):
+                    if(self.bot.up-j>=0):
+                        if(self.bot.sensedEnvironment[self.bot.up-j][self.bot.left+1+x[2]][0]=='?'):
+                            self.bot.sensedEnvironment[self.bot.up-j][self.bot.left+1+x[2]][0]=' '
+                            
+                if(self.bot.up-value>=0):        
+                    if(self.bot.sensedEnvironment[self.bot.up-j][self.bot.left+1+x[2]][0]=='?'):
+                            self.bot.sensedEnvironment[self.bot.up-j][self.bot.left+1+x[2]][0]='X'
+                
+            elif('down' in x):
+                if('long' in x):
+                    senseRange=self.longRange
+                else:
+                    senseRange=self.shortRange
+                    
+                if(value==-1):
+                    for j in range(0, senseRange):
+                        if(self.bot.sensedEnvironment[self.bot.down+j][self.bot.left+1+x[2]][0]=='?'):
+                            self.bot.sensedEnvironment[self.bot.down+j][self.bot.left+1+x[2]][0]=' '
+                    
+                for j in range(0, value):
+                    if(self.bot.down+j<=14):
+                        if(self.bot.sensedEnvironment[self.bot.down+j][self.bot.left+1+x[2]][0]=='?'):
+                            self.bot.sensedEnvironment[self.bot.down+j][self.bot.left+1+x[2]][0]=' '
+                
+                if(self.bot.down+value<=14):          
+                    if(self.bot.sensedEnvironment[self.bot.down+j][self.bot.right+value][0]=='?'):
+                            self.bot.sensedEnvironment[self.bot.down+j][self.bot.right+value][0]='X'
+            
+    
+    
+    def coverage(self):
         pass
+    
     
     
     
