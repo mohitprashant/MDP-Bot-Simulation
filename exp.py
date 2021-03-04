@@ -7,15 +7,18 @@ Created on Mon Mar  1 10:29:45 2021
 
 from environment import Environment
 from robot import Robot
+from fps import FPS
 import time
 
 class EXP:
     env=Environment()
     bot=Robot()
+    fps=FPS()
     
     start=[18, 1]
     targetCoverage=100
     timeAvailable=360
+    startTime=-1.0
     goalVisited=False
     
     executeEndSequence=False
@@ -29,7 +32,7 @@ class EXP:
         
     def reset(self):
         self.bot=Robot()
-        self.fastestPath=FPS()
+        self.fps=FPS()
         
         
     def getCoverage(self):
@@ -51,15 +54,54 @@ class EXP:
         self.bot.processSense(readingstring)
         
         
+    def getMDF(self):
+        p1, p2 = self.bot.getBotMDF()
+        return "FIN|"+p1+"|"+p2
+    
+    
+    def updateAndroid(self):
+        p1, p2 = self.bot.getBotMDF()
+        p2=p2[:-1]
+        orient, pos = self.bot.direction, self.bot.position       
+        
+        
     def exploreStep(self):
-        if(self.getCoverage()>=self.targetCoverage and self.goalVisited==True):
+        if(self.startTime==-1.0):
+            self.startTime=time.time()
+        
+        if(time.time()-self.startTime>=self.timeAvailable-60 or self.getCoverage()>=self.targetCoverage):
             self.executeEndSequence=True
+            p1, p2 = self.bot.getBotMDF()
+            self.fps.setEnvironment(p1, p2)
+            
+            if(self.goalVisited):
+                self.endSequence=self.fps.getShortestPath(self.bot.position, self.bot.direction, [18, 1])
+            else:
+                pass
+            
         
         if(self.bot.position[0]<4 and self.bot.position[1]>11):
             self.goalVisited=True
         
         if(self.executeEndSequence):
-            pass
+            if(self.endSequenceIndex>=len(self.endSequence)):
+                return self.getMDF()
+            
+            if(self.endSequence[self.endSequenceIndex]=='F'):
+                self.bot.moveForward()
+                self.endSequenceIndex+=1
+                return "EXP|SFS"
+            
+            elif(self.endSequence[self.endSequenceIndex]=='L'):
+                self.bot.turnLeft()
+                self.endSequenceIndex+=1
+                return "EXP|SLS"
+            
+            elif(self.endSequence[self.endSequenceIndex]=='R'):
+                self.bot.turnLeft()
+                self.endSequenceIndex+=1
+                return "EXP|SRS"                
+            
         else:
             if(self.bot.direction=='right'):  #Turn right, else forward, else left, else back
                 canGoRight=True
@@ -226,4 +268,3 @@ class EXP:
                             self.bot.moveForward()
                             return "EXP|SLSLSFS"
         
-print(time.time())

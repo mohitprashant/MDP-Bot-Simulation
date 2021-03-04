@@ -5,7 +5,7 @@ Created on Thu Feb 25 15:03:22 2021
 @author: 18moh
 """
 from binarytohex import binhex
-import environment
+from environment import Environment
 
 class Robot:
     position=[18, 1]            #current position
@@ -16,12 +16,12 @@ class Robot:
     
     direction='right'
     
-    shortRange=7
-    longRange=13
+    shortRange=3
+    longRange=8
     
     sensors=[
              ['short', 'right', 1],
-             ['short', 'right', 0],
+             ['short', 'right', -1],
              ['short', 'right', -1],
              ['short', 'down', 0],
              ['short', 'down', -1],
@@ -142,31 +142,76 @@ class Robot:
         
         for x in self.sensors:
             senseRange=0
+            obstacleDetect=False
+            
             if('right' in x):
                 if('long' in x):
                     senseRange=self.longRange
                 else:
                     senseRange=self.shortRange
                 
-                for i in range(1, senseRange):
-                        if(i==1):
-                            pass
+                for i in range(0, senseRange):
+                    if(self.right+i>=14 or 'X' in environment.env[self.up+1+x[2]][self.right+i]):
+                        readings.append(i)
+                        obstacleDetect=True
+                        break
+                if(obstacleDetect==False):
+                    readings.append(-1)
             
             elif('left' in x):
-                pass
+                if('long' in x):
+                    senseRange=self.longRange
+                else:
+                    senseRange=self.shortRange
+                
+                for i in range(0, senseRange):
+                    if(self.left-i<=0 or 'X' in environment.env[self.up+1+x[2]][self.left-i]):
+                        readings.append(i)
+                        obstacleDetect=True
+                        break
+                if(obstacleDetect==False):
+                    readings.append(-1)
         
             elif('up' in x):
-                pass
+                if('long' in x):
+                    senseRange=self.longRange
+                else:
+                    senseRange=self.shortRange
+                
+                for i in range(0, senseRange):
+                    if(self.up-i<=0 or 'X' in environment.env[self.up-i][self.left+1+x[2]]):
+                        readings.append(i)
+                        obstacleDetect=True
+                        break
+                if(obstacleDetect==False):
+                    readings.append(-1)
                 
             elif('down' in x):
-                pass
+                if('long' in x):
+                    senseRange=self.longRange
+                else:
+                    senseRange=self.shortRange
+                
+                for i in range(0, senseRange):
+                    if(self.down+i<=19 or 'X' in environment.env[self.down+i][self.left+1+x[2]]):
+                        readings.append(i)
+                        obstacleDetect=True
+                        break
+                if(obstacleDetect==False):
+                    readings.append(-1)
+            
+        outstring=""
+        for x in readings:
+            outstring+=str(x)+"|"
+            
+        return outstring
         
     
     def processSense(self, readings):
-        for i in range(self.bot.left, self.bot.right+1):
-            for j in range(self.bot.up, self.bot.down+1):
-                if(self.bot.sensedEnvironment[j][i]=='?'):
-                    self.bot.sensedEnvironment[j][i]==' '
+        for i in range(self.left, self.right+1):
+            for j in range(self.up, self.down+1):
+                if(self.sensedEnvironment[j][i]=='?'):
+                    self.sensedEnvironment[j][i]==' '
         
         sense=readings.split('|')
         for i in range(len(sense)):
@@ -185,17 +230,17 @@ class Robot:
                     
                 if(value==-1):
                     for j in range(0, senseRange):
-                        if(self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.right+j][0]=='?'):
-                            self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.right+j][0]=' '
+                        if(self.sensedEnvironment[self.up+1+x[2]][self.right+j][0]=='?'):
+                            self.sensedEnvironment[self.up+1+x[2]][self.right+j][0]=' '
                     
                 for j in range(0, value):
-                    if(self.bot.right+j<=14):
-                        if(self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.right+j][0]=='?'):
-                            self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.right+j][0]=' '
+                    if(self.right+j<=14):
+                        if(self.sensedEnvironment[self.up+1+x[2]][self.right+j][0]=='?'):
+                            self.sensedEnvironment[self.up+1+x[2]][self.right+j][0]=' '
                 
-                if(self.bot.right+value<=14):          
-                    if(self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.right+value][0]=='?'):
-                            self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.right+value][0]='X'
+                if(self.right+value<=14):          
+                    if(self.sensedEnvironment[self.up+1+x[2]][self.right+value][0]=='?'):
+                            self.sensedEnvironment[self.up+1+x[2]][self.right+value][0]='X'
                     
             elif('left' in x):
                 if('long' in x):
@@ -205,17 +250,17 @@ class Robot:
                     
                 if(value==-1):
                     for j in range(0, senseRange):
-                        if(self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.left-j][0]=='?'):
-                            self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.left-j][0]=' '
+                        if(self.sensedEnvironment[self.up+1+x[2]][self.left-j][0]=='?'):
+                            self.sensedEnvironment[self.up+1+x[2]][self.left-j][0]=' '
                     
                 for j in range(0, value):
-                    if(self.bot.left-j>=0):
-                        if(self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.left-j][0]=='?'):
-                            self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.left-j][0]=' '
+                    if(self.left-j>=0):
+                        if(self.sensedEnvironment[self.up+1+x[2]][self.left-j][0]=='?'):
+                            self.sensedEnvironment[self.up+1+x[2]][self.left-j][0]=' '
                             
-                if(self.bot.left-value>=0):          
-                    if(self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.left-value][0]=='?'):
-                            self.bot.sensedEnvironment[self.bot.up+1+x[2]][self.bot.left-value][0]='X'
+                if(self.left-value>=0):          
+                    if(self.sensedEnvironment[self.up+1+x[2]][self.left-value][0]=='?'):
+                            self.sensedEnvironment[self.up+1+x[2]][self.left-value][0]='X'
         
             elif('up' in x):
                 if('long' in x):
@@ -225,17 +270,17 @@ class Robot:
                     
                 if(value==-1):
                     for j in range(0, senseRange):
-                        if(self.bot.sensedEnvironment[self.bot.up-j][self.bot.left+1+x[2]][0]=='?'):
-                            self.bot.sensedEnvironment[self.bot.up-j][self.bot.left+1+x[2]][0]=' '
+                        if(self.sensedEnvironment[self.up-j][self.left+1+x[2]][0]=='?'):
+                            self.sensedEnvironment[self.up-j][self.left+1+x[2]][0]=' '
                     
                 for j in range(0, value):
-                    if(self.bot.up-j>=0):
-                        if(self.bot.sensedEnvironment[self.bot.up-j][self.bot.left+1+x[2]][0]=='?'):
-                            self.bot.sensedEnvironment[self.bot.up-j][self.bot.left+1+x[2]][0]=' '
+                    if(self.up-j>=0):
+                        if(self.sensedEnvironment[self.up-j][self.left+1+x[2]][0]=='?'):
+                            self.sensedEnvironment[self.up-j][self.left+1+x[2]][0]=' '
                             
-                if(self.bot.up-value>=0):        
-                    if(self.bot.sensedEnvironment[self.bot.up-j][self.bot.left+1+x[2]][0]=='?'):
-                            self.bot.sensedEnvironment[self.bot.up-j][self.bot.left+1+x[2]][0]='X'
+                if(self.up-value>=0):        
+                    if(self.sensedEnvironment[self.up-j][self.left+1+x[2]][0]=='?'):
+                            self.sensedEnvironment[self.up-j][self.left+1+x[2]][0]='X'
                 
             elif('down' in x):
                 if('long' in x):
@@ -245,26 +290,70 @@ class Robot:
                     
                 if(value==-1):
                     for j in range(0, senseRange):
-                        if(self.bot.sensedEnvironment[self.bot.down+j][self.bot.left+1+x[2]][0]=='?'):
-                            self.bot.sensedEnvironment[self.bot.down+j][self.bot.left+1+x[2]][0]=' '
+                        if(self.sensedEnvironment[self.down+j][self.left+1+x[2]][0]=='?'):
+                            self.sensedEnvironment[self.down+j][self.left+1+x[2]][0]=' '
                     
                 for j in range(0, value):
-                    if(self.bot.down+j<=14):
-                        if(self.bot.sensedEnvironment[self.bot.down+j][self.bot.left+1+x[2]][0]=='?'):
-                            self.bot.sensedEnvironment[self.bot.down+j][self.bot.left+1+x[2]][0]=' '
+                    if(self.down+j<=14):
+                        if(self.sensedEnvironment[self.down+j][self.left+1+x[2]][0]=='?'):
+                            self.sensedEnvironment[self.down+j][self.left+1+x[2]][0]=' '
                 
-                if(self.bot.down+value<=14):          
-                    if(self.bot.sensedEnvironment[self.bot.down+j][self.bot.right+value][0]=='?'):
-                            self.bot.sensedEnvironment[self.bot.down+j][self.bot.right+value][0]='X'
+                if(self.down+value<=14):          
+                    if(self.sensedEnvironment[self.down+j][self.right+value][0]=='?'):
+                            self.sensedEnvironment[self.down+j][self.right+value][0]='X'
             
+    def getBotMDF(self):
+        p1=''
+        p2=''
+        
+        p1+='11'
+        
+        for i in range(0, 20):
+            for j in range(0, 15):
+                if('?' in self.sensedEnvironment[19-i][j]):
+                    p1+='0'
+                else:
+                    p1+='1'
+                    if('X' in self.sensedEnvironment[19-i][j]):
+                        p2+='1'
+                    else:
+                        p2+='0'
+                        
+        p1+='11'
+        
+        hexp1=''
+        hexp2=''
+        
+        i=0
+        while(i<len(p1)):
+            h1=p1[i:i+4]
+            hexp1+=binhex[h1]
+            i+=4
+            
+        while(len(p2)%4!=0):
+            p2+='0'
+        
+        i=0
+        while(i<len(p2)):
+            h2=p2[i:i+4]
+            hexp2+=binhex[h2]
+            i+=4
+            
+        return hexp1, hexp2
     
     
-    def coverage(self):
-        pass
+def displayEnvironmentWithBot(environment, bot):    
+    for i in range(bot.left, bot.right+1):
+        for j in range(bot.up, bot.down+1):
+            environment.env[j][i].append('R')
     
-    
-    
-    
+    for x in environment.env:
+        print(x)
+        
+    for i in range(len(environment.env)):
+        for j in range(len(environment.env[i])):
+            if('R' in environment.env[i][j]):
+                environment.env[i][j].remove('R')
     
     
     

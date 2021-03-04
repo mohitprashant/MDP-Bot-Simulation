@@ -5,7 +5,6 @@ Created on Thu Feb 25 14:48:28 2021
 @author: 18moh
 """
 from binarytohex import binhex
-import robot
 
 
 class Environment:
@@ -67,18 +66,7 @@ class Environment:
             print(x)
             
 
-def displayEnvironmentWithBot(environment, bot):    
-    for i in range(bot.left, bot.right+1):
-        for j in range(bot.up, bot.down+1):
-            environment.env[j][i].append('R')
-    
-    for x in environment.env:
-        print(x)
-        
-    for i in range(len(environment.env)):
-        for j in range(len(environment.env[i])):
-            if('R' in environment.env[i][j]):
-                environment.env[i][j].remove('R')
+
         
 
 

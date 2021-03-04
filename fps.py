@@ -23,6 +23,7 @@ class FPS:
         self.waypoint=[x, y]
         
     def getShortestPath(self, start, direction, goal):
+        self.bot.sensedEnvironment=self.env.env        
         pathBuilder=[]
         
         for i in range(20):
@@ -40,7 +41,7 @@ class FPS:
         
         for i in range(20):
             for j in range(15):
-                if('X' in self.env.env[i][j]):
+                if('X' in self.env.env[i][j] or '?' in self.env.env[i][j]):
                     pathBuilder[i][j].append('X')
                     for a in range(i-1, i+2):
                         for b in range(j-1, j+2):
@@ -68,7 +69,7 @@ class FPS:
             adjacent=[]
             
             
-            if('X' not in pathBuilder[node[0]][node[1]+1]):
+            if('X' not in pathBuilder[node[0]][node[1]+1] ):
                 adjacent.append([node[0], node[1]+1])
                 if([node[0], node[1]+1] not in finished and [node[0], node[1]+1] not in queue):
                     queue.append([node[0], node[1]+1])
@@ -170,13 +171,53 @@ class FPS:
         actionlist1=self.getShortestPath(self.start, self.bot.direction, self.waypoint)
         actionlist2=self.getShortestPath(self.waypoint, actionlist1[0], self.goal)
         
-        moveset=actionlist1[1:]+actionlist2[1:]
+        movesFromLastAlign=0
+        alignASAP=False
         
-        outputstring="FPS|"
+        moveset=actionlist1[1:]+actionlist2[1:]            
+        
+        outputstring=""
         for x in moveset:
             outputstring+=x
-    
-        return outputstring
+            
+            if(x=='L'):
+                self.bot.turnLeft()
+                #alignASAP=True
+            elif(x=='R'):
+                self.bot.turnRight()
+                #alignASAP=True
+            elif(x=='F'):
+                self.bot.moveForward()
+                movesFromLastAlign+=1
+            
+            readings=self.bot.sense(self.env).split('|')
+            
+            if((movesFromLastAlign>=4 or alignASAP) and (readings[0]==readings[2])):
+                #outputstring+='A'
+                movesFromLastAlign=0
+                alignASAP=False
+            elif((movesFromLastAlign>=4 or alignASAP) and (readings[3]==readings[4])):
+                #outputstring+='A'
+                movesFromLastAlign=0
+                alignASAP=False
+        
+        print(outputstring)
+        
+        betteroutputstring="FPS|"
+        fcount=0
+        for x in outputstring:
+            if(x=='F'):
+                fcount+=1
+            else:
+                if(fcount==0):
+                    continue
+                else:
+                    betteroutputstring+=str(fcount)+","
+                    fcount=0
+                    betteroutputstring+=x+","
+        betteroutputstring+=str(fcount)
+        
+        return betteroutputstring
     
     
 #########
