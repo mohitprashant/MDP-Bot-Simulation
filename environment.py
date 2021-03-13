@@ -7,10 +7,10 @@ Created on Thu Feb 25 14:48:28 2021
 from binarytohex import binhex
 
 
-class Environment:
-    env=[]
-    
+class Environment:    
     def __init__(self):
+        self.env=[]
+        
         for i in range(20):
             l=[]
             for j in range(15):

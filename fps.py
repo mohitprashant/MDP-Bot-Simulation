@@ -8,13 +8,13 @@ Created on Mon Mar  1 03:46:09 2021
 from robot import Robot
 from environment import Environment
 
-class FPS:
-    env=Environment()
-    bot=Robot()
-    
-    start=[18, 1]
-    waypoint=[1, 1]
-    goal=[1, 13]
+class FPS:    
+    def __init__(self):
+        self.bot=Robot()
+        self.env=Environment()
+        self.start=[18, 1]
+        self.waypoint=[1, 1]
+        self.goal=[1, 13]
     
     def setEnvironment(self, p1, p2):
         self.env.createEnvironmentMDF(p1, p2)
@@ -174,59 +174,69 @@ class FPS:
         movesFromLastAlign=0
         alignASAP=False
         
-        moveset=actionlist1[1:]+actionlist2[1:]            
+        moveset=actionlist1[1:]+actionlist2[1:]
         
         outputstring=""
         for x in moveset:
             outputstring+=x
             
-            if(x=='L'):
-                self.bot.turnLeft()
-                #alignASAP=True
-            elif(x=='R'):
-                self.bot.turnRight()
-                #alignASAP=True
-            elif(x=='F'):
-                self.bot.moveForward()
-                movesFromLastAlign+=1
+            # if(x=='L'):
+            #     self.bot.turnLeft()
+            #     #alignASAP=True
+            # elif(x=='R'):
+            #     self.bot.turnRight()
+            #     #alignASAP=True
+            # elif(x=='F'):
+            #     self.bot.moveForward()
+            #     movesFromLastAlign+=1
             
-            readings=self.bot.sense(self.env).split('|')
+            # readings=self.bot.sense(self.env).split('|')
             
-            if((movesFromLastAlign>=4 or alignASAP) and (readings[0]==readings[2])):
-                #outputstring+='A'
-                movesFromLastAlign=0
-                alignASAP=False
-            elif((movesFromLastAlign>=4 or alignASAP) and (readings[3]==readings[4])):
-                #outputstring+='A'
-                movesFromLastAlign=0
-                alignASAP=False
-        
-        print(outputstring)
+            # if((movesFromLastAlign>=4 or alignASAP) and (readings[0]==readings[2])):
+            #     #outputstring+='A'
+            #     movesFromLastAlign=0
+            #     alignASAP=False
+            # elif((movesFromLastAlign>=4 or alignASAP) and (readings[3]==readings[4])):
+            #     #outputstring+='A'
+            #     movesFromLastAlign=0
+            #     alignASAP=False
+            
+        # print(outputstring)
         
         betteroutputstring="FPS|"
         fcount=0
+        
         for x in outputstring:
             if(x=='F'):
                 fcount+=1
             else:
                 if(fcount==0):
-                    continue
-                else:
-                    betteroutputstring+=str(fcount)+","
-                    fcount=0
-                    betteroutputstring+=x+","
-        betteroutputstring+=str(fcount)
+                    pass
+                elif(fcount<10):
+                    betteroutputstring+='0'+str(fcount)+"|"
+                elif(fcount>=10):
+                    betteroutputstring+=str(fcount)+"|"
+                fcount=0
+                betteroutputstring+='T'+x+"|"
+        
+        if(fcount==0):
+            pass
+        elif(fcount<10):
+            betteroutputstring+='0'+str(fcount)
+        elif(fcount>=10):
+            betteroutputstring+=str(fcount)
+        fcount=0
         
         return betteroutputstring
     
     
 #########
-fps=FPS()
-p1='FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
-p2='00400080010000000000003F000000000000400100040F000000000380000000080010002000'
-fps.setEnvironment(p1, p2)
-fps.setWaypoint(1, 1)
-print(fps.getShortestPathWithWaypoint())
+# fps=FPS()
+# p1='FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+# p2='000000000000010042038400000000000000030C000000000000021F84000800000000000400'
+# fps.setEnvironment(p1, p2)
+# fps.setWaypoint(2, 2)
+# print(fps.getShortestPathWithWaypoint())
 #########
         
         
